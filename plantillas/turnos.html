@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda de Turnos Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e5e7eb}
+.container{max-width:1200px;margin:auto;padding:24px}h1{margin:0 0 6px;font-size:28px} .subtitle{opacity:.8;margin-bottom:20px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px} .card{background:#020617;border:1px solid #1f2937;border-radius:18px;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.35)}
+
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#020617;color:#e5e7eb}
+
+/* Calendario blanco */ input[type="date"],input[type="time"]{background:#ffffff;color:#020617}
+
+button{padding:12px 16px;border:none;border-radius:10px;font-weight:600;cursor:pointer} .btn-primary{background:linear-gradient(135deg,#38bdf8,#3b82f6);color:#020617} .btn-secondary{background:#334155;color:white} .btn-danger{background:#ef4444;color:white}
+
+.table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px} th,td{padding:10px;text-align:center;border-bottom:1px solid #1f2937} th{background:#020617;position:sticky;top:0}
+
+footer{text-align:center;margin-top:20px;opacity:.6} </style>
+
+</head>
+<body>
+<div class="container">
+<h1>📅 Agenda de Turnos Online</h1>
+<p class="subtitle">Gestión moderna de clientes, servicios y recordatorios</p><div class="grid">
+  <div class="card">
+    <h3>Nuevo Turno</h3>
+    <div style="display:grid;gap:10px">
+      <input type="date" id="date">
+      <input type="time" id="time">
+      <input type="text" id="client" placeholder="Nombre del cliente">
+      <input type="text" id="service" placeholder="Servicio">
+      <select id="reminder">
+        <option value="0">Sin recordatorio</option>
+        <option value="5">5 minutos antes</option>
+        <option value="15">15 minutos antes</option>
+        <option value="60">1 hora antes</option>
+      </select>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="addAppointment()">Agregar Turno</button>
+        <button class="btn-secondary" onclick="downloadCSV()">Descargar CSV</button>
+      </div>
+    </div>
+  </div>  <div class="card">
+    <h3>Próximos Turnos</h3>
+    <table class="table">
+      <thead>
+        <tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Servicio</th><th></th></tr>
+      </thead>
+      <tbody id="upcoming"></tbody>
+    </table>
+  </div>
+</div><div class="card" style="margin-top:16px">
+  <h3>Historial Completo</h3>
+  <table class="table">
+    <thead>
+      <tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Servicio</th><th></th></tr>
+    </thead>
+    <tbody id="history"></tbody>
+  </table>
+</div><footer>Hecho en HTML, CSS y JavaScript</footer>
+</div><script>
+let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+
+function addAppointment(){
+  const date=document.getElementById('date').value;
+  const time=document.getElementById('time').value;
+  const client=document.getElementById('client').value.trim();
+  const service=document.getElementById('service').value.trim();
+  const reminder=parseInt(document.getElementById('reminder').value);
+
+  if(!date||!time||!client||!service){alert('Completa todos los campos');return;}
+
+  const datetime=new Date(`${date}T${time}`);
+  appointments.push({date,time,client,service,reminder,datetime});
+  save();
+
+  document.getElementById('client').value='';
+  document.getElementById('service').value='';
+}
+
+function deleteAppointment(i){appointments.splice(i,1);save();}
+
+function save(){localStorage.setItem('appointments',JSON.stringify(appointments));render();}
+
+function render(){
+  const now=new Date();
+  const upcomingBody=document.getElementById('upcoming');
+  const historyBody=document.getElementById('history');
+
+  upcomingBody.innerHTML='';
+  historyBody.innerHTML='';
+
+  appointments.sort((a,b)=>new Date(a.datetime)-new Date(b.datetime));
+
+  appointments.forEach((a,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${a.date}</td><td>${a.time}</td><td>${a.client}</td><td>${a.service}</td><td><button class='btn-danger' onclick='deleteAppointment(${i})'>X</button></td>`;
+
+    if(new Date(a.datetime)>=now) upcomingBody.appendChild(tr);
+    else historyBody.appendChild(tr);
+  });
+}
+
+function downloadCSV(){
+  let csv='Fecha,Hora,Cliente,Servicio\n';
+  appointments.forEach(a=>{csv+=`${a.date},${a.time},"${a.client}","${a.service}"\n`;});
+
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download='agenda_turnos.csv';
+  link.click();
+}
+
+/* Recordatorios simples con alert */
+setInterval(()=>{
+  const now=new Date();
+  appointments.forEach(a=>{
+    if(a.reminder>0){
+      const diff=(new Date(a.datetime)-now)/60000;
+      if(diff>0 && diff<0.5){
+        alert(`Recordatorio: Turno con ${a.client} (${a.service}) a las ${a.time}`);
+        a.reminder=0; // evitar repetición
+        save();
+      }
+    }
+  });
+},30000);
+
+render();
+</script></body>
+</html>
