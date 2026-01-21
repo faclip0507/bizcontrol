@@ -1,1 +1,174 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control Diario de Ventas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { margin: 0; background: linear-gradient(135deg,#0f172a,#1e293b); color:#e5e7eb; }
+    .container { max-width: 1200px; margin: auto; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 6px; }
+    .subtitle { opacity: .8; margin-bottom: 24px; }.card { background: #020617; border: 1px solid #1f2937; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,.3); }
 
+.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; margin-bottom: 16px; }
+
+input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background:#020617; color:#e5e7eb; }
+
+button { padding: 12px 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
+.btn-primary { background: linear-gradient(135deg,#38bdf8,#3b82f6); color:#020617; }
+.btn-danger { background:#ef4444; color:white; }
+.btn-secondary { background:#334155; color:white; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { padding: 10px; text-align: center; border-bottom: 1px solid #1f2937; }
+th { background:#020617; position: sticky; top: 0; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 12px; margin-top: 16px; }
+.stat { background:#020617; border:1px solid #1f2937; border-radius:12px; padding:14px; text-align:center; }
+.stat h3 { margin:0; font-size:14px; opacity:.8; }
+.stat p { margin:6px 0 0; font-size:20px; font-weight:700; }
+
+footer { margin-top: 24px; opacity:.6; text-align:center; }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Control Diario de Ventas</h1>
+    <p class="subtitle">Registro moderno de ventas, compras y ganancias</p><div class="card">
+  <div class="grid">
+    <input type="datetime-local" id="datetime" />
+    <select id="type">
+      <option value="venta">Venta</option>
+      <option value="compra">Compra</option>
+    </select>
+    <input type="text" id="description" placeholder="Descripción-Cliente/Proveedor" />
+    <input type="number" id="amount" placeholder="Monto ($)" />
+  </div>
+  <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <button class="btn-primary" onclick="addTransaction()">Agregar</button>
+    <button class="btn-secondary" onclick="downloadCSV()">Descargar Reporte CSV</button>
+    <button class="btn-danger" onclick="clearAll()">Borrar Todo</button>
+  </div>
+
+  <table id="table">
+    <thead>
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Tipo</th>
+        <th>Descripción-Cliente/Proveedor</th>
+        <th>Monto ($)</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="stats">
+    <div class="stat">
+      <h3>Total Ventas</h3>
+      <p id="totalSales">$0</p>
+    </div>
+    <div class="stat">
+      <h3>Total Compras</h3>
+      <p id="totalPurchases">$0</p>
+    </div>
+    <div class="stat">
+      <h3>Ganancia del Día</h3>
+      <p id="profit">$0</p>
+    </div>
+  </div>
+</div>
+
+<footer>Hecho en HTML, CSS y JavaScript – listo para usar</footer>
+
+  </div>  <script>
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+    function addTransaction() {
+      const datetime = document.getElementById('datetime').value;
+      const type = document.getElementById('type').value;
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+
+      if (!datetime || !description || isNaN(amount)) {
+        alert('Completa todos los campos');
+        return;
+      }
+
+      transactions.push({ datetime, type, description, amount });
+      saveAndRender();
+
+      document.getElementById('description').value = '';
+      document.getElementById('amount').value = '';
+    }
+
+    function deleteTransaction(index) {
+      transactions.splice(index, 1);
+      saveAndRender();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      renderTable();
+      calculateTotals();
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#table tbody');
+      tbody.innerHTML = '';
+
+      transactions.forEach((t, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(t.datetime).toLocaleString()}</td>
+          <td>${t.type}</td>
+          <td>${t.description}</td>
+          <td>$${t.amount.toFixed(2)}</td>
+          <td><button class="btn-danger" onclick="deleteTransaction(${index})">X</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateTotals() {
+      let sales = 0;
+      let purchases = 0;
+
+      transactions.forEach(t => {
+        if (t.type === 'venta') sales += t.amount;
+        else purchases += t.amount;
+      });
+
+      const profit = sales - purchases;
+
+      document.getElementById('totalSales').textContent = `$${sales.toFixed(2)}`;
+      document.getElementById('totalPurchases').textContent = `$${purchases.toFixed(2)}`;
+      document.getElementById('profit').textContent = `$${profit.toFixed(2)}`;
+    }
+
+    function downloadCSV() {
+      let csv = 'Fecha y Hora,Tipo,Descripción,Monto\n';
+      transactions.forEach(t => {
+        csv += `"${new Date(t.datetime).toLocaleString()}",${t.type},"${t.description}",${t.amount}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'reporte_ventas.csv';
+      link.click();
+    }
+
+    function clearAll() {
+      if (confirm('¿Seguro que quieres borrar todo?')) {
+        transactions = [];
+        saveAndRender();
+      }
+    }
+
+    renderTable();
+    calculateTotals();
+  </script></body>
+</html>
