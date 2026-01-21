@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Cuentas Corrientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e5e7eb}
+.container{max-width:1200px;margin:auto;padding:24px}h1{margin:0 0 6px;font-size:28px} .subtitle{opacity:.8;margin-bottom:20px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px} .card{background:#020617;border:1px solid #1f2937;border-radius:18px;padding:18px;box-shadow:0 10px 25px rgba(0,0,0,.35)}
+
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#020617;color:#e5e7eb}
+
+button{padding:10px 14px;border:none;border-radius:10px;font-weight:600;cursor:pointer} .btn-primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617} .btn-danger{background:#ef4444;color:white}
+
+.table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px} th,td{padding:10px;text-align:center;border-bottom:1px solid #1f2937} th{background:#020617;position:sticky;top:0}
+
+.badge{padding:4px 8px;border-radius:8px;font-size:12px;font-weight:600} .cliente{background:#2563eb} .proveedor{background:#7c3aed}
+
+footer{text-align:center;margin-top:20px;opacity:.6} </style>
+
+</head>
+<body>
+<div class="container">
+<h1>📒 Control de Cuentas Corrientes</h1>
+<p class="subtitle">Clientes y proveedores con historial y exportación</p><div class="grid">
+  <div class="card">
+    <h3>Nuevo Movimiento</h3>
+    <div style="display:grid;gap:10px">
+      <select id="type">
+        <option value="Cliente">Cliente</option>
+        <option value="Proveedor">Proveedor</option>
+      </select>
+      <input type="text" id="name" placeholder="Nombre cliente / proveedor">
+      <input type="date" id="date">
+      <input type="text" id="product" placeholder="Producto / Concepto">
+      <input type="number" id="amount" placeholder="Monto ($)">
+      <button class="btn-primary" onclick="addEntry()">Agregar</button>
+    </div>
+  </div>  <div class="card">
+    <h3>Historial</h3>
+    <button class="btn-primary" style="margin-bottom:10px" onclick="downloadExcel()">Descargar Excel</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Nombre</th>
+          <th>Fecha</th>
+          <th>Producto</th>
+          <th>Monto ($)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div><footer>Hecho en HTML, CSS y JavaScript</footer>
+</div><script>
+let entries = JSON.parse(localStorage.getItem('cuentas')) || [];
+
+function addEntry(){
+  const type=document.getElementById('type').value;
+  const name=document.getElementById('name').value.trim();
+  const date=document.getElementById('date').value;
+  const product=document.getElementById('product').value.trim();
+  const amount=parseFloat(document.getElementById('amount').value);
+
+  if(!name||!date||!product||isNaN(amount)){
+    alert('Completa todos los campos');
+    return;
+  }
+
+  entries.push({type,name,date,product,amount});
+  save();
+
+  document.getElementById('name').value='';
+  document.getElementById('product').value='';
+  document.getElementById('amount').value='';
+}
+
+function deleteEntry(i){entries.splice(i,1);save();}
+
+function save(){localStorage.setItem('cuentas',JSON.stringify(entries));render();}
+
+function render(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+
+  entries.forEach((e,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="badge ${e.type==='Cliente'?'cliente':'proveedor'}">${e.type}</span></td>
+      <td>${e.name}</td>
+      <td>${e.date}</td>
+      <td>${e.product}</td>
+      <td>$${e.amount.toFixed(2)}</td>
+      <td><button class="btn-danger" onclick="deleteEntry(${i})">X</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function downloadExcel(){
+  const BOM='\uFEFF';
+  let tsv=BOM+'Tipo\tNombre\tFecha\tProducto\tMonto ($)\r\n';
+  entries.forEach(e=>{
+    tsv+=`${e.type}\t${e.name}\t${e.date}\t${e.product}\t${e.amount}\r\n`;
+  });
+  const blob=new Blob([tsv],{type:'text/tab-separated-values;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download='cuentas_corrientes.tsv';
+  link.click();
+}
+
+render();
+</script></body>
+</html>

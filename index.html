@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BizControl</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top left, rgba(56,189,248,.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(34,197,94,.18), transparent 45%),
+    linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#e5e7eb;
+}
+
+/* ===== HEADER ===== */
+header{
+  position:relative;
+  padding:64px 20px 56px;
+  text-align:center;
+  overflow:hidden;
+}
+
+header::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(56,189,248,.25), transparent 60%);
+  pointer-events:none;
+}
+
+.logo{
+  font-size:48px;
+  font-weight:800;
+  letter-spacing:-1px;
+}
+
+.logo span{
+  color:#38bdf8;
+}
+
+.subtitle{
+  margin-top:10px;
+  opacity:.8;
+  font-size:17px;
+}
+
+/* ===== CONTAINER ===== */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:24px;
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title{
+  margin:40px 0 16px;
+  font-size:20px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.section-title span{
+  font-size:14px;
+  font-weight:600;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(56,189,248,.15);
+  color:#38bdf8;
+}
+
+/* ===== GRID ===== */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:22px;
+}
+
+/* ===== CARD ===== */
+.card{
+  position:relative;
+  background:#020617;
+  border:1px solid #1f2937;
+  border-radius:22px;
+  padding:26px;
+  cursor:pointer;
+  transition:.35s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+
+.card::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent,rgba(56,189,248,.08),transparent);
+  opacity:0;
+  transition:.35s ease;
+}
+
+.card:hover::after{
+  opacity:1;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  border-color:#38bdf8;
+  box-shadow:0 25px 55px rgba(0,0,0,.65);
+}
+
+.card h3{
+  margin:0;
+  font-size:18px;
+  font-weight:700;
+}
+
+.card p{
+  margin-top:12px;
+  font-size:14px;
+  opacity:.75;
+  line-height:1.45;
+}
+
+.open{
+  margin-top:18px;
+  font-size:13px;
+  font-weight:600;
+  color:#38bdf8;
+}
+
+/* ===== FOOTER ===== */
+footer{
+  text-align:center;
+  opacity:.55;
+  padding:28px 12px;
+  font-size:13px;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:480px){
+  .logo{font-size:36px}
+}
+/* ---------- FOOTER ---------- */
+
+footer{
+  position:relative;
+  padding:70px 20px 50px;
+  background:linear-gradient(180deg,#020617,#020617ee);
+  border-top:1px solid rgba(255,255,255,.06);
+  overflow:hidden;
+}
+
+footer::before{
+  content:'';
+  position:absolute;
+  top:-120px;
+  left:50%;
+  transform:translateX(-50%);
+  width:600px;
+  height:300px;
+  background:radial-gradient(circle,rgba(56,189,248,.25),transparent 70%);
+  filter:blur(80px);
+  animation:footerGlow 10s ease-in-out infinite alternate;
+}
+
+@keyframes footerGlow{
+  0%{opacity:.4}
+  100%{opacity:.8}
+}
+
+.footer-content{
+  max-width:900px;
+  margin:auto;
+  text-align:center;
+  position:relative;
+  z-index:1;
+}
+
+.footer-content h3{
+  margin:0 0 14px;
+  font-size:22px;
+  font-weight:700;
+  background:linear-gradient(90deg,#38bdf8,#22c55e);
+  background-clip:text;
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.footer-text{
+  font-size:14px;
+  line-height:1.6;
+  color:#cbd5f5;
+  margin:6px 0;
+}
+
+.footer-text.muted{
+  opacity:.7;
+}
+
+.footer-copy{
+  display:block;
+  margin-top:18px;
+  font-size:12px;
+  opacity:.55;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo"><span>Biz</span>Control</div>
+  <div class="subtitle">
+    Herramientas simples, modernas y sin vueltas<br>
+    para negocios y para tu vida diaria
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ===== NEGOCIO ===== -->
+  <div class="section-title">
+    🏪 Para tu negocio
+    <span>Gestión</span>
+  </div>
+
+  <div class="grid">
+    <div class="card" onclick="openApp('plantillas/ventas.html')">
+      <h3>📊 Control diario de ventas</h3>
+      <p>Registrá ventas, compras y ganancias con exportación a Excel.</p>
+      <div class="open">Abrir →</div>
+    </div>
+
+    <div class="card" onclick="openApp('plantillas/stock.html')">
+      <h3>📦 Control de stock automático</h3>
+      <p>Inventario simple con entradas, salidas y reportes.</p>
+      <div class="open">Abrir →</div>
+    </div>
+
+    <div class="card" onclick="openApp('plantillas/cuentas.html')">
+      <h3>📒 Cuentas corrientes</h3>
+      <p>Clientes y proveedores con historial claro y ordenado.</p>
+      <div class="open">Abrir →</div>
+    </div>
+
+    <div class="card" onclick="openApp('plantillas/turnos.html')">
+      <h3>📅 Agenda de turnos online</h3>
+      <p>Calendario, servicios, clientes y recordatorios.</p>
+      <div class="open">Abrir →</div>
+    </div>
+  </div>
+
+  <!-- ===== PERSONAL ===== -->
+  <div class="section-title" style="margin-top:52px">
+    💙 Para tu vida personal
+    <span>Finanzas</span>
+  </div>
+
+  <div class="grid">
+    <div class="card" onclick="openApp('plantillas/gastos.html')">
+      <h3>💰 Control de gastos personales</h3>
+      <p>Ingresos, gastos, ahorro mensual y gráficos claros.</p>
+      <div class="open">Abrir →</div>
+    </div>
+  </div>
+
+</div>
+
+    <footer>
+        <div class="footer-content">
+          <h3>BizControl</h3>
+      
+          <p class="footer-text">
+            BizControl ofrece herramientas digitales de organización y control
+            para negocios y uso personal.
+          </p>
+      
+          <p class="footer-text muted">
+            Los datos ingresados se almacenan únicamente en el navegador del usuario
+            mediante <strong>localStorage</strong>. BizControl no recopila información
+            ni utiliza servidores externos.
+          </p>
+      
+          <span class="footer-copy">
+            © 2026 BizControl · Herramientas simples para decisiones inteligentes
+          </span>
+        </div>
+    </footer>
+
+<script>
+function openApp(path){
+  window.location.href = path;
+}
+</script>
+ 
+</body>
+</html>
